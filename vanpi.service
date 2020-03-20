@@ -1,0 +1,14 @@
+[Unit]
+Description=vanpi
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart=/home/pi/vanpi/monitor_and_web.py
+
+[Install]
+WantedBy=multi-user.target
