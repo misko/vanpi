@@ -5,134 +5,206 @@
       </script>
       <script src="static/Chart.bundle.min.js"></script>
 </head>
-<div id="current"></div>
-<div>
-<canvas id="amps_and_volts"></canvas>
-</div>
-<div>
-<canvas id="temps"></canvas>
-</div>
+<table style="width:100%">
+  <tr>
+    <td colspan="2"><div id="current"></div></td>
+  </tr>
+  <tr>
+    <td td style="width:50%;">
+<canvas id="short_amps_and_volts"></canvas>
+    </td>
+    <td td style="width:50%;">
+<canvas id="short_temps"></canvas>
+    </td>
+  </tr>
+  <tr>
+    <td td style="width:50%;">
+<canvas id="long_amps_and_volts"></canvas>
+    </td>
+    <td td style="width:50%;">
+<canvas id="long_temps"></canvas>
+    </td>
+  </tr>
+</table>
+
+
 
 <script>
-	$.getJSON('/past_stats/50000', function(data) {
-		current=data[data.length-1];
-		$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
-		amps_data = data.map(function(p) {
-			return {x:p.ts,y:p.amps}
-		} );
-		v_data = data.map(function(p) {
-			return {x:p.ts,y:p.v}
-		} );
-		max_t_data = data.map(function(p) {
-			return {x:p.ts,y:p.max_temp}
-		} );
-		min_t_data = data.map(function(p) {
-			return {x:p.ts,y:p.min_temp}
-		} );
-		amp_color= "rgba(255,187,205,1.0)";
-		volt_color= "rgba(180,180,255,1.0)";
-		var ctx = document.getElementById('amps_and_volts').getContext('2d');
-		var scatterChart = new Chart(ctx, {
-			type: 'line',
-			data: {
-				datasets: [
-					{
-						label: 'amps',
-						yAxisID: 'A',
-						data: amps_data,
-						borderColor: amp_color,
-						backgroundColor: amp_color,
-						pointColor: amp_color,
-						fill: false
-					},
-					{
-						label: 'volts',
-						yAxisID: 'V',
-						data: v_data,
-						borderColor: volt_color,
-						backgroundColor: volt_color,
-						pointColor: volt_color,
-						fill: false
-					},
-				]
+	var short_amps_and_volts_chart;
+        var short_temp_chart;
+	var long_amps_and_volts_chart;
+        var long_temp_chart;
+function update_charts(data,amps_and_volts_chart,temp_chart) {
+	var current=data[data.length-1];
+	$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
+	var amps_data = data.map(function(p) {
+		return {x:p.ts,y:p.amps}
+	} );
+	var v_data = data.map(function(p) {
+		return {x:p.ts,y:p.v}
+	} );
+	var max_t_data = data.map(function(p) {
+		return {x:p.ts,y:p.max_temp}
+	} );
+	var min_t_data = data.map(function(p) {
+		return {x:p.ts,y:p.min_temp}
+	} );
+	amps_and_volts_chart.data.datasets[0].data=amps_data;
+	amps_and_volts_chart.data.datasets[1].data=v_data;
+	amps_and_volts_chart.update();
+	temp_chart.data.datasets[0].data=max_t_data;
+	temp_chart.data.datasets[1].data=min_t_data;
+	temp_chart.update();
+}
+function make_charts(data,amps_and_volts_str,temps_str) {
+	var current=data[data.length-1];
+	$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
+	var amps_data = data.map(function(p) {
+		return {x:p.ts,y:p.amps}
+	} );
+	var v_data = data.map(function(p) {
+		return {x:p.ts,y:p.v}
+	} );
+	var max_t_data = data.map(function(p) {
+		return {x:p.ts,y:p.max_temp}
+	} );
+	var min_t_data = data.map(function(p) {
+		return {x:p.ts,y:p.min_temp}
+	} );
+	var amp_color= "rgba(255,187,205,1.0)";
+	var volt_color= "rgba(180,180,255,1.0)";
+	var ctx = document.getElementById(amps_and_volts_str).getContext('2d');
+	var amps_and_volts_chart = new Chart(ctx, {
+		type: 'line',
+		data: {
+			datasets: [
+				{
+					label: 'amps',
+					yAxisID: 'A',
+					data: amps_data,
+					borderColor: amp_color,
+					backgroundColor: amp_color,
+					pointColor: amp_color,
+					fill: false
+				},
+				{
+					label: 'volts',
+					yAxisID: 'V',
+					data: v_data,
+					borderColor: volt_color,
+					backgroundColor: volt_color,
+					pointColor: volt_color,
+					fill: false
+				},
+			]
+		},
+		options: {
+			scales: {
+				xAxes: [{
+					type: 'linear',
+					position: 'bottom',
+					type: 'time',
+					time: {
+						unit: 'second'
+					}
+				}],
+				yAxes: [{
+					id: 'A',
+					type: 'linear',
+					position: 'left',
+					scaleLabel: {
+						display: true,
+						labelString: 'Amps'
+					}
+				}, {
+					id: 'V',
+					type: 'linear',
+					position: 'right',
+					scaleLabel: {
+						display: true,
+						labelString: 'Volts'
+					}
+				}]
 			},
-			options: {
-				scales: {
-					xAxes: [{
-						type: 'linear',
-						position: 'bottom',
-						type: 'time',
-						time: {
-							unit: 'second'
-						}
-					}],
-					yAxes: [{
-						id: 'A',
-						type: 'linear',
-						position: 'left',
-						scaleLabel: {
-							display: true,
-							labelString: 'Amps'
-						}
-					}, {
-						id: 'V',
-						type: 'linear',
-						position: 'right',
-						scaleLabel: {
-							display: true,
-							labelString: 'Volts'
-						}
-					}]
+			elements: {
+				point:{
+					radius: 0
 				}
 			}
-		});
-		max_t_color= "rgba(255,100,100,1.0)";
-		min_t_color= "rgba(100,100,255,1.0)";
-		var ctx = document.getElementById('temps').getContext('2d');
-		var scatterChart = new Chart(ctx, {
-			type: 'line',
-			data: {
-				datasets: [
-					{
-						label: 'max temp',
-						data: max_t_data,
-						borderColor: max_t_color,
-						backgroundColor: max_t_color,
-						pointColor: max_t_color,
-						fill: false
-					},
-					{
-						label: 'min temp',
-						data: min_t_data,
-						borderColor: min_t_color,
-						backgroundColor: min_t_color,
-						pointColor: min_t_color,
-						fill: false
-					},
-				]
-			},
-			options: {
-				scales: {
-					xAxes: [{
-						type: 'linear',
-						position: 'bottom',
-						type: 'time',
-						time: {
-							unit: 'second'
-						}
-					}],
-					yAxes: [{
-						type: 'linear',
-						position: 'left',
-						scaleLabel: {
-							display: true,
-							labelString: 'C'
-						}
-					}]
-				}
-			}
-		});
+		}
 	});
+	var max_t_color= "rgba(255,100,100,1.0)";
+	var min_t_color= "rgba(100,100,255,1.0)";
+	var ctx = document.getElementById(temps_str).getContext('2d');
+	var temp_chart = new Chart(ctx, {
+		type: 'line',
+		data: {
+			datasets: [
+				{
+					label: 'max temp',
+					data: max_t_data,
+					borderColor: max_t_color,
+					backgroundColor: max_t_color,
+					pointColor: max_t_color,
+					fill: false
+				},
+				{
+					label: 'min temp',
+					data: min_t_data,
+					borderColor: min_t_color,
+					backgroundColor: min_t_color,
+					pointColor: min_t_color,
+					fill: false
+				},
+			]
+		},
+		options: {
+			scales: {
+				xAxes: [{
+					type: 'linear',
+					position: 'bottom',
+					type: 'time',
+					time: {
+						unit: 'second'
+					}
+				}],
+				yAxes: [{
+					type: 'linear',
+					position: 'left',
+					scaleLabel: {
+						display: true,
+						labelString: 'C'
+					}
+				}]
+			},
+			elements: {
+				point:{
+					radius: 0
+				}
+			}
+		}
+	});
+	return [amps_and_volts_chart, temp_chart];
+}
+
+
+$.getJSON('/past_stats/500', function(data) { 
+	const [ short_amps_and_volts_chart, short_temp_chart ] = make_charts(data,'short_amps_and_volts','short_temps');
+	const interval = setInterval(function() {
+		$.getJSON('/past_stats/500', function(data) {
+			update_charts(data,short_amps_and_volts_chart,short_temp_chart);
+		});
+	}, 1000);
+});
+$.getJSON('/past_stats/5000', function(data) { 
+	const [ long_amps_and_volts_chart, long_temp_chart ] = make_charts(data,'long_amps_and_volts','long_temps');
+	const interval = setInterval(function() {
+		$.getJSON('/past_stats/5000', function(data) { 
+			update_charts(data,long_amps_and_volts_chart,long_temp_chart);
+		});
+	}, 1000);
+});
+
 </script>
 
 
