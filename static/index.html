@@ -71,8 +71,8 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 	var min_t_data = data.map(function(p) {
 		return {x:p.ts,y:p.min_temp}
 	} );
-	var amp_color= "rgba(255,187,205,1.0)";
-	var volt_color= "rgba(180,180,255,1.0)";
+	var amp_color= "rgba(255,0,0,0.8)";
+	var volt_color= "rgba(0,0,255,0.3)";
 	var ctx = document.getElementById(amps_and_volts_str).getContext('2d');
 	var amps_and_volts_chart = new Chart(ctx, {
 		type: 'line',
@@ -85,7 +85,8 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 					borderColor: amp_color,
 					backgroundColor: amp_color,
 					pointColor: amp_color,
-					fill: false
+					borderWidth: 0,
+					fill: true
 				},
 				{
 					label: 'volts',
@@ -94,7 +95,8 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 					borderColor: volt_color,
 					backgroundColor: volt_color,
 					pointColor: volt_color,
-					fill: false
+					borderWidth: 0,
+					fill: true
 				},
 			]
 		},
@@ -115,6 +117,10 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 					scaleLabel: {
 						display: true,
 						labelString: 'Amps'
+					},
+					ticks: {
+						suggestedMin: -80,
+						suggestedMax: 50
 					}
 				}, {
 					id: 'V',
@@ -123,6 +129,10 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 					scaleLabel: {
 						display: true,
 						labelString: 'Volts'
+					},
+					ticks: {
+						suggestedMin: 18,
+						suggestedMax: 25
 					}
 				}]
 			},
@@ -174,6 +184,10 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 					scaleLabel: {
 						display: true,
 						labelString: 'C'
+					},
+					ticks: {
+						suggestedMin: -5,
+						suggestedMax: 30
 					}
 				}]
 			},
@@ -188,7 +202,7 @@ function make_charts(data,amps_and_volts_str,temps_str) {
 }
 
 
-$.getJSON('/past_stats/500', function(data) { 
+$.getJSON('/past_stats/900', function(data) { 
 	const [ short_amps_and_volts_chart, short_temp_chart ] = make_charts(data,'short_amps_and_volts','short_temps');
 	const interval = setInterval(function() {
 		$.getJSON('/past_stats/500', function(data) {
@@ -196,10 +210,10 @@ $.getJSON('/past_stats/500', function(data) {
 		});
 	}, 1000);
 });
-$.getJSON('/past_stats/5000', function(data) { 
+$.getJSON('/past_stats/86400', function(data) { 
 	const [ long_amps_and_volts_chart, long_temp_chart ] = make_charts(data,'long_amps_and_volts','long_temps');
 	const interval = setInterval(function() {
-		$.getJSON('/past_stats/5000', function(data) { 
+		$.getJSON('/past_stats/86400', function(data) { 
 			update_charts(data,long_amps_and_volts_chart,long_temp_chart);
 		});
 	}, 1000);
