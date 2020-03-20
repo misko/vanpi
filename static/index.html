@@ -1,0 +1,132 @@
+<html>
+<head>
+<script type = "text/javascript" 
+	         src = "static/jquery.min.js">
+      </script>
+      <script src="static/Chart.bundle.min.js"></script>
+</head>
+<canvas id="amps_and_volts"></canvas>
+<canvas id="temps"></canvas>
+
+<script>
+	$.getJSON('/past_stats/50000', function(data) {
+		amps_data = data.map(function(p) {
+			return {x:p.ts,y:p.amps}
+		} );
+		v_data = data.map(function(p) {
+			return {x:p.ts,y:p.v}
+		} );
+		max_t_data = data.map(function(p) {
+			return {x:p.ts,y:p.max_temp}
+		} );
+		min_t_data = data.map(function(p) {
+			return {x:p.ts,y:p.min_temp}
+		} );
+		amp_color= "rgba(255,187,205,1.0)";
+		volt_color= "rgba(180,180,255,1.0)";
+		var ctx = document.getElementById('amps_and_volts').getContext('2d');
+		var scatterChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+				datasets: [
+					{
+						label: 'amps',
+						yAxisID: 'A',
+						data: amps_data,
+						borderColor: amp_color,
+						backgroundColor: amp_color,
+						pointColor: amp_color,
+						fill: false
+					},
+					{
+						label: 'volts',
+						yAxisID: 'V',
+						data: v_data,
+						borderColor: volt_color,
+						backgroundColor: volt_color,
+						pointColor: volt_color,
+						fill: false
+					},
+				]
+			},
+			options: {
+				scales: {
+					xAxes: [{
+						type: 'linear',
+						position: 'bottom',
+						type: 'time',
+						time: {
+							unit: 'second'
+						}
+					}],
+					yAxes: [{
+						id: 'A',
+						type: 'linear',
+						position: 'left',
+						scaleLabel: {
+							display: true,
+							labelString: 'Amps'
+						}
+					}, {
+						id: 'V',
+						type: 'linear',
+						position: 'right',
+						scaleLabel: {
+							display: true,
+							labelString: 'Volts'
+						}
+					}]
+				}
+			}
+		});
+		max_t_color= "rgba(255,100,100,1.0)";
+		min_t_color= "rgba(100,100,255,1.0)";
+		var ctx = document.getElementById('temps').getContext('2d');
+		var scatterChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+				datasets: [
+					{
+						label: 'max temp',
+						data: max_t_data,
+						borderColor: max_t_color,
+						backgroundColor: max_t_color,
+						pointColor: max_t_color,
+						fill: false
+					},
+					{
+						label: 'min temp',
+						data: min_t_data,
+						borderColor: min_t_color,
+						backgroundColor: min_t_color,
+						pointColor: min_t_color,
+						fill: false
+					},
+				]
+			},
+			options: {
+				scales: {
+					xAxes: [{
+						type: 'linear',
+						position: 'bottom',
+						type: 'time',
+						time: {
+							unit: 'second'
+						}
+					}],
+					yAxes: [{
+						type: 'linear',
+						position: 'left',
+						scaleLabel: {
+							display: true,
+							labelString: 'C'
+						}
+					}]
+				}
+			}
+		});
+	});
+</script>
+
+
+</html>
