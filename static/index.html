@@ -1,53 +1,56 @@
 <html>
-<head>
-<script type = "text/javascript" 
-	         src = "static/jquery.min.js">
-      </script>
-      <script src="static/Chart.bundle.min.js"></script>
-</head>
-<table style="width:100%">
-  <tr>
-    <td colspan="2"><div id="current"></div></td>
-  </tr>
-  <tr>
-    <td td style="width:50%;">
-<canvas id="short_amps_and_volts"></canvas>
-    </td>
-    <td td style="width:50%;">
-<canvas id="short_temps"></canvas>
-    </td>
-  </tr>
-  <tr>
-    <td td style="width:50%;">
-<canvas id="long_amps_and_volts"></canvas>
-    </td>
-    <td td style="width:50%;">
-<canvas id="long_temps"></canvas>
-    </td>
-  </tr>
-</table>
+	<head>
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+		<script type = "text/javascript" 
+			src = "static/jquery.min.js">
+		</script>
+		<script src="static/Chart.bundle.min.js"></script>
+	</head>
+	<table style="width:100%">
+		<tr>
+			<td colspan="2"><div id="current"></div></td>
+		</tr>
+		<tr>
+			<td td style="width:50%;">
+				<canvas id="short_amps_and_volts"></canvas>
+			</td>
+			<td td style="width:50%;">
+				<canvas id="short_temps"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td td style="width:50%;">
+				<canvas id="long_amps_and_volts"></canvas>
+			</td>
+			<td td style="width:50%;">
+				<canvas id="long_temps"></canvas>
+			</td>
+		</tr>
+	</table>
 
 
 
-<script>
-	var short_amps_and_volts_chart;
-        var short_temp_chart;
-	var long_amps_and_volts_chart;
-        var long_temp_chart;
+	<script>
+		var short_amps_and_volts_chart;
+var short_temp_chart;
+var long_amps_and_volts_chart;
+var long_temp_chart;
 function update_charts(data,amps_and_volts_chart,temp_chart) {
 	var current=data[data.length-1];
 	$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
 	var amps_data = data.map(function(p) {
-		return {x:p.ts,y:p.amps}
+		return {x:p.ts*1000,y:p.amps}
 	} );
 	var v_data = data.map(function(p) {
-		return {x:p.ts,y:p.v}
+		return {x:p.ts*1000,y:p.v}
 	} );
 	var max_t_data = data.map(function(p) {
-		return {x:p.ts,y:p.max_temp}
+		return {x:p.ts*1000,y:p.max_temp}
 	} );
 	var min_t_data = data.map(function(p) {
-		return {x:p.ts,y:p.min_temp}
+		return {x:p.ts*1000,y:p.min_temp}
 	} );
 	amps_and_volts_chart.data.datasets[0].data=amps_data;
 	amps_and_volts_chart.data.datasets[1].data=v_data;
@@ -219,7 +222,7 @@ $.getJSON('/past_stats/86400', function(data) {
 	}, 1000);
 });
 
-</script>
+	</script>
 
 
 </html>
