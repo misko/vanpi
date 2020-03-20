@@ -26,8 +26,7 @@ min_ts_delta = 20
 
 def timestamp():
     dt = datetime.datetime.now() 
-    utc_time = dt.replace(tzinfo = timezone.utc) 
-    return utc_time.timestamp() 
+    return dt.timestamp() 
 
 app = Flask(__name__)
 
