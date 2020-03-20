@@ -4,9 +4,11 @@ After=network.target
 StartLimitIntervalSec=0
 
 [Service]
+WorkingDirectory=/home/pi/vanpi/
 Type=simple
 Restart=always
 RestartSec=5
+Environment=DISPLAY=:0
 User=root
 ExecStart=/home/pi/vanpi/monitor_and_web.py
 

@@ -10,6 +10,18 @@ import json
 from datetime import timezone 
 import datetime 
 import time
+import pyscreenshot as ImageGrab
+import smtplib
+from os.path import basename
+from email.mime.multipart import MIMEMultipart
+from email.utils import COMMASPACE
+from email.mime.image import MIMEImage
+from email.mime.text import MIMEText
+import schedule
+import time
+import datetime
+
+
 min_ts_delta = 20
 
 def timestamp():
@@ -25,6 +37,50 @@ redisClient = redis.StrictRedis(host='localhost',
 
 #set up global
 current_stats = {}
+
+def get_creds():
+    f=open("smtp.creds",'r')
+    user,password=f.readline().strip().split(',')
+    f.close()
+    return user,password
+
+def send_email(subject,body,pngfiles=[]):
+    sender,passwd = get_creds()
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login(sender,passwd)
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = 'mouse9911@gmail.com'
+    msg.preamble = 'Not sure what goes here'
+    msg.attach(MIMEText(body))
+    for file in pngfiles:
+        with open(file, 'rb') as fp:
+            img = MIMEImage(fp.read())
+        msg.attach(img)
+    server.send_message(msg)
+    server.quit()
+
+def send_report(tag=""):
+    im = ImageGrab.grab()
+    im.save('/home/pi/vanpi/screenshot.png')
+    dt = datetime.datetime.now()
+    subject="%sCFO - %s report" % (tag,str(dt))
+    body=str(current_stats)
+    send_email(subject,body,['/home/pi/vanpi/screenshot.png'])
+    print("SENT MAIL")
+
+def schedule_thread():
+    time.sleep(60)
+    send_report('start')
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+schedule.every().day.at("21:00").do(send_report)
+schedule.every().day.at("09:00").do(send_report)
 
 @app.route('/current_stats')
 def get_current_stats():
@@ -78,7 +134,9 @@ def monitor_can_bus():
 if __name__ == '__main__':
     t=threading.Thread(target=monitor_can_bus)
     t.start()
-    print("running app")
+    t=threading.Thread(target=schedule_thread)
+    t.start()
+    #screen_grab()
     app.run(host='0.0.0.0', port=80)
 
 
