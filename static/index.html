@@ -10,6 +10,9 @@
 	</head>
 	<table style="width:100%">
 		<tr>
+			<td colspan="2"><div id="whos_here"></div></td>
+		</tr>
+		<tr>
 			<td colspan="2"><div id="current"></div></td>
 		</tr>
 		<tr>
@@ -220,6 +223,16 @@ $.getJSON('/past_stats/86400', function(data) {
 			update_charts(data,long_amps_and_volts_chart,long_temp_chart);
 		});
 	}, 1000);
+});
+$.getJSON('/whos_here', function(data) { 
+	console.log(data);
+	$('#whos_here').empty();
+	$.each(data, function( key, value) {
+		console.log(value[1]);
+		if (value[1]>-90) {
+			$('#whos_here').append('<img src="static/imgs/'+value[0]+'.png" height="42" width="42">');
+		}
+	});
 });
 
 	</script>
