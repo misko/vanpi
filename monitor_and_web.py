@@ -20,7 +20,8 @@ from email.mime.text import MIMEText
 import schedule
 import time
 import datetime
-
+import bles
+whos_here = []
 
 min_ts_delta = 20
 
@@ -80,6 +81,8 @@ def schedule_thread():
 
 schedule.every().day.at("21:00").do(send_report)
 schedule.every().day.at("09:00").do(send_report)
+schedule.every().day.at("22:00").do(send_report)
+schedule.every().hour.do(send_report)
 
 @app.route('/current_stats')
 def get_current_stats():
@@ -91,6 +94,10 @@ def get_past_stats(l):
     ts=int(timestamp())
     r=redisClient.zrangebyscore("battery_stats",ts-l,ts)
     return jsonify( [ json.loads(x) for x in r ] )
+
+@app.route('/whos_here')
+def get_whos_here():
+    return jsonify( whos_here )
 
 @app.route('/')
 def root():
@@ -130,10 +137,18 @@ def monitor_can_bus():
             last_ts=ts
     os.system('sudo ifconfig can0 down')
 
+def ble_scanner():
+    global whos_here
+    while True:
+        whos_here = bles.scan()
+    
+
 if __name__ == '__main__':
     t=threading.Thread(target=monitor_can_bus)
     t.start()
     t=threading.Thread(target=schedule_thread)
+    t.start()
+    t=threading.Thread(target=ble_scanner)
     t.start()
     #screen_grab()
     app.run(host='0.0.0.0', port=80)
