@@ -42,7 +42,9 @@ var long_amps_and_volts_chart;
 var long_temp_chart;
 function update_charts(data,amps_and_volts_chart,temp_chart) {
 	var current=data[data.length-1];
-	$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
+	if (current) {
+		$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
+	}
 	var amps_data = data.map(function(p) {
 		return {x:p.ts*1000,y:p.amps}
 	} );
@@ -64,7 +66,9 @@ function update_charts(data,amps_and_volts_chart,temp_chart) {
 }
 function make_charts(data,amps_and_volts_str,temps_str) {
 	var current=data[data.length-1];
-	$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
+	if (current) {
+		$('#current').text(`Amps ${current.amps} , Voltage ${current.v}`);;
+	}
 	var amps_data = data.map(function(p) {
 		return {x:p.ts,y:p.amps}
 	} );
@@ -224,16 +228,16 @@ $.getJSON('/past_stats/86400', function(data) {
 		});
 	}, 1000);
 });
-$.getJSON('/whos_here', function(data) { 
-	console.log(data);
-	$('#whos_here').empty();
-	$.each(data, function( key, value) {
-		console.log(value[1]);
-		if (value[1]>-90) {
-			$('#whos_here').append('<img src="static/imgs/'+value[0]+'.png" height="42" width="42">');
-		}
+const interval = setInterval(function() {
+	$.getJSON('/whos_here', function(data) { 
+		$('#whos_here').empty();
+		$.each(data, function( key, value) {
+			if (value[1]>-90) {
+				$('#whos_here').append('<img src="static/imgs/'+value[0]+'.png" height="42" width="42">');
+			}
+		});
 	});
-});
+}, 1000);
 
 	</script>
 

@@ -35,6 +35,17 @@ redisClient = redis.StrictRedis(host='localhost',
                                 port=6379,
                                 db=0)
 
+redis_online=False
+while not redis_online:
+    try:
+        redisClient.zrangebyscore("battery_stats",0,1)
+    except redis.exceptions.BusyLoadingError:
+        print("wait for redis to load")
+        time.sleep(1)
+        continue
+    redis_online=True
+    break
+
 #set up global
 current_stats = {}
 
@@ -82,6 +93,7 @@ def schedule_thread():
 schedule.every().day.at("21:00").do(send_report)
 schedule.every().day.at("09:00").do(send_report)
 schedule.every().day.at("22:00").do(send_report)
+schedule.every(10).minutes.do(send_report)
 schedule.every().hour.do(send_report)
 
 @app.route('/current_stats')
@@ -140,7 +152,10 @@ def monitor_can_bus():
 def ble_scanner():
     global whos_here
     while True:
-        whos_here = bles.scan()
+        try:
+            whos_here = bles.scan()
+        except:
+            print("ERROR")
     
 
 if __name__ == '__main__':
